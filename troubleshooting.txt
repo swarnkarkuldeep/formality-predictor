@@ -1,0 +1,142 @@
+
+# Formality Prediction System - Troubleshooting Guide
+
+## Common Issues and Solutions
+
+### 1. Permission Errors
+**Symptoms**: "Access denied" or permission errors when running predict.py  
+**Solutions**:
+- Manually create the `models` directory:
+  ```mkdir "e:\research paper\models"
+  ```
+- Run the script as administrator
+- Check folder permissions in Windows Explorer
+
+### 2. Missing Data Files
+**Symptoms**: FileNotFoundError when loading CSV files  
+**Solutions**:
+- Ensure these files exist in the `data` folder:
+  - training_labeled.csv
+  - eval_labeled.csv
+  - reddit_comments.csv
+- Verify file paths in data_loader.py if you need to use custom locations
+
+### 3. Model Loading Errors
+**Symptoms**: "No module named '_loss'" or similar errors  
+**Solutions**:
+1. Delete the existing model files:
+   ```
+   del models\formality_model.pkl
+   del models\embedding_cache.pkl
+   ```
+2. The script will automatically retrain the model on next run
+
+### 4. CUDA/GPU Issues
+**Symptoms**: Errors related to CUDA or GPU availability  
+**Solutions**:
+- Check if PyTorch can detect your GPU:
+  ```
+  import torch
+  print(torch.cuda.is_available())
+  ```
+- If no GPU available, it will automatically fall back to CPU
+
+### 5. Dependency Conflicts
+**Symptoms**: Version mismatch errors  
+**Solutions**:
+- Create a clean virtual environment
+- Install exact versions:
+  ```
+  pip install tensorflow torch transformers scikit-learn pandas numpy joblib
+  ```
+
+## Debugging Tips
+
+1. Enable verbose logging by removing these lines in predict.py:
+   ```
+   os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+   tf.get_logger().setLevel('ERROR')
+   warnings.filterwarnings('ignore')
+   ```
+
+2. Check the model files:
+   - formality_model.pkl - Main classifier
+   - embedding_cache.pkl - Cached BERT embeddings
+
+3. Test individual components:
+   ```
+   from data_loader import load_labeled_data
+   train, eval = load_labeled_data()
+   print(train.head())
+   ```
+
+## System Requirements
+- Python 3.8+
+- Windows/Linux/macOS
+- GPU recommended but not required
+- Minimum 4GB RAM (8GB recommended)
+```
+
+### 6. Slow Performance
+**Symptoms**: Predictions take too long or system freezes  
+**Solutions**:
+- Clear the embedding cache periodically:
+  ```
+  del models\embedding_cache.pkl
+  ```
+- Reduce batch size in predict() if processing multiple texts
+- Upgrade hardware (especially RAM and GPU)
+
+### 7. Memory Errors
+**Symptoms**: "Out of memory" or "MemoryError" messages  
+**Solutions**:
+- Reduce the number of parallel predictions
+- Restart Python kernel/script
+- Add memory management to predict():
+  ```
+  torch.cuda.empty_cache()
+  ```
+
+### 8. Prediction Inconsistencies
+**Symptoms**: Same text gets different formality scores  
+**Solutions**:
+- Clear cache and retrain model
+- Check for special characters affecting tokenization
+- Verify text preprocessing consistency
+
+### 9. Installation Issues
+**Symptoms**: "ModuleNotFoundError" for required packages  
+**Solutions**:
+- Verify Python version (3.8+ required)
+- Try alternative installation methods:
+  ```
+  pip install --upgrade --force-reinstall transformers
+  ```
+- Check PATH environment variables
+
+### 10. File Corruption
+**Symptoms**: "EOFError" or "pickle" errors  
+**Solutions**:
+1. Delete corrupted files:
+   ```
+   del models\*.pkl
+   ```
+2. Retrain model
+3. Verify disk integrity
+
+## Advanced Debugging
+- To profile memory usage:
+  ```import tracemalloc
+  tracemalloc.start()
+  # Run prediction
+  snapshot = tracemalloc.take_snapshot()
+  top_stats = snapshot.statistics('lineno')
+  print(top_stats[:10])
+  ```
+
+- To check TensorFlow/PyTorch versions:
+  ```import tensorflow as tf
+  import torch
+  print(tf.__version__, torch.__version__)
+  ```
+```
