@@ -13,7 +13,7 @@ A machine learning model that classifies text as formal or informal and provides
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/formality-predictor.git
+   git clone https://github.com/swarnkarkuldeep/formality-predictor.git
    cd formality-predictor
    ```
 
